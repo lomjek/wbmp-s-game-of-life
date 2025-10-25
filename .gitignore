@@ -1,2 +1,4 @@
 main
 main.exe
+.main.c.*
+file.wbmp
