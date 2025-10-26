@@ -23,15 +23,16 @@ int main(int argc, char *argv[]){
     }
     printf("Loading first frame!\n"); 
     char *original_frame = argv[1];
-    raw_data_size = load_wbmp(original_frame, &width, &height, current_structure);
+    raw_data_size = load_wbmp(original_frame, &width, &height, &current_structure);
     if (!raw_data_size > 0) {
         printf("The image at the provided path is invalid.\nPlease verify your path.\nThis App quit!\n");
         return 2;
     }
     
+    printf("%s", current_structure);    
     //testing
-    char opath[15] = "./output.wbmp";
-    save_wbmp(&opath, current_structure, width, height, raw_data_size);
+    char *opath = "output.wbmp";
+    save_wbmp(opath, current_structure, width, height, raw_data_size);
 
     //Cleanup before exit.
     free(current_structure);

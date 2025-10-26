@@ -1,10 +1,11 @@
 #include "headers/wbmp_io.h"
 
-size_t load_wbmp(char *file_path, unsigned int *width, unsigned int *height, uint8_t *buffer){
+size_t load_wbmp(char *file_path, unsigned int *width, unsigned int *height, uint8_t **buffer){
     printf("Loading WBMP file: %s\n", file_path);
     FILE *file = fopen(file_path, "rb");
     if (file == NULL) {
         printf("Could not read the input file!\n");
+        *buffer = NULL;
         return 0;
     }
     printf("\tFile opened!\n");
@@ -54,14 +55,19 @@ size_t load_wbmp(char *file_path, unsigned int *width, unsigned int *height, uin
     printf("\tLoaded image dimesnions!\n");
     //Getting the image data
     size_t calc_data_size = (size_t)(((*width * *height) + 7) / 8);
-    buffer = (uint8_t *)malloc(calc_data_size);
+    if (calc_data_size == 0) {
+        printf("Not understood what to allocate!");
+        *buffer = 0;
+        return 0;
+    }
+    *buffer = (uint8_t *)malloc(calc_data_size);
 
-    if (buffer == NULL){
-        perror("Could not allocate memory for the image data!\n");
+    if (*buffer == NULL){
+        printf("Could not allocate memory for the image data!\n");
         return 0;
     }
     printf("\tPrepared memory for the image!\n"); 
-    size_t data_amount = fread(buffer, 1, calc_data_size, file);
+    size_t data_amount = fread(*buffer, 1, calc_data_size, file);
     if(data_amount != calc_data_size) {
         perror("Not entire image data could be read!\n");
         return 0;
