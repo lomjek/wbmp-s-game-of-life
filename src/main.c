@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
     
     //Handle the input image
     raw_data_size = load_wbmp(original_frame, &width, &height, &current_structure);
-    if (!raw_data_size > 0) {
+    if (raw_data_size <= 0) {
         printf("The image at the provided path is invalid.\nPlease verify your path.\nThis App quit!\n");
         return 2;
     }

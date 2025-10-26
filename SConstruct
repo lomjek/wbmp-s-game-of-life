@@ -12,7 +12,7 @@ if target == 'debug':
 elif target == 'release':
     print("Building RELEASE configuration...")
     env.Append(
-        CCFLAGS = ['-Oz', '-DNDEBUG', '-Wextra', '-Wall'],
+        CCFLAGS = ['-Oz', '-DNDEBUG'],
         CPPDEFINES = ['RELEASE']
     )
 
@@ -22,6 +22,7 @@ else:
 
 
 env.Append(
+    CCGLAGS = ['-Wextra', '-Wall'],
     CPPPATH=['#'],
     LIBS=['m']
 ) 
