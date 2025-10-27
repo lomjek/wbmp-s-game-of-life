@@ -1,9 +1,14 @@
 game_of_life
 game_of_life.exe
 
+frames/
+.vscode/
+
 .sconsign.dblite
 
 *.o
 *.swp
 *.swo
 *.wbmp
+
+!IMG_4030.wbmp
