@@ -24,6 +24,6 @@ else:
 env.Append(
     CCGLAGS = ['-Wextra', '-Wall'],
     CPPPATH=['#'],
-    LIBS=['m']
+    LIBS=['m', 'rt']
 ) 
 env.Program('game_of_life', Glob('src/*.c'))

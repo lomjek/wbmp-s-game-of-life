@@ -61,7 +61,6 @@ size_t load_wbmp(char *file_path, unsigned int *width, unsigned int *height, uin
 #ifdef DEBUG
     printf("\tLoaded image dimesnions!\n");
 #endif
-
     //Getting the image data
     size_t calc_data_size = (size_t)(((*width * *height) + 7) / 8);
     if (calc_data_size == 0) {

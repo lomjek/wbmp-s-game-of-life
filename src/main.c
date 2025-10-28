@@ -8,6 +8,9 @@
 
 #include "headers/wbmp_io.h"
 #include "headers/dir_io.h"
+#include "headers/timer.h"
+
+uint64_t start_time = 0;
 
 unsigned int height = 0;
 unsigned int width = 0;
@@ -28,6 +31,9 @@ void update_pixel(int line, int column) {
 }
 
 bool step() {
+    //Push current structure to last structure
+    *last_structure = *current_structure;
+
     for (int line = 0; line < height; line++) {
         for (int column = 0; column < width; column++) {
             update_pixel(line, column);
@@ -62,6 +68,7 @@ bool save_current_frame() {
 }
 
 int main(int argc, char *argv[]){
+    start_time = get_time();
 	printf("WBMP's game of life!\nVersion Alpha, almost nothing is done yet.\n--------------------\n\n");
    
     // Get the arguments
@@ -91,6 +98,14 @@ int main(int argc, char *argv[]){
     
     //Handle the input image
     raw_data_size = load_wbmp(original_frame, &width, &height, &current_structure);
+
+    last_structure = (uint8_t *)malloc(raw_data_size);
+
+    if (last_structure == NULL){
+        printf("Could not allocate memory for the image data!\n");
+        return 0;
+    }
+
     if (raw_data_size <= 0) {
         printf("The image at the provided path is invalid.\nPlease verify your path.\nThis App quit!\n");
         return 2;
@@ -110,9 +125,11 @@ int main(int argc, char *argv[]){
     //Actual logic
     printf("Loading complete, running loop:\n");
     while (current_step < final_step){
+        // Save the current frame
         if (!save_current_frame()) {
             printf("Frame %0*lu saved successfully!\n", used_digits, current_step);
         }
+        printf("\n----------------\n%05.4fms\n\n", get_elapsed_ms(start_time));
         //Rendering the next frame
         printf("Rendering frame: %0*lu/", used_digits, current_step + 1);
         printf("%lu\n", final_step);
@@ -121,12 +138,16 @@ int main(int argc, char *argv[]){
         //Increment the step counter
         current_step += 1;
     }
-    
+    // Save the last frame!
+    if (!save_current_frame()) {
+        printf("Frame %0*lu saved successfully!\n", used_digits, current_step);
+    }
+    printf("\n----------------\n%05.4fms\n\n", get_elapsed_ms(start_time));
     printf("Rendered all frames, cleaning up!\n");
  
     //Cleanup before exit.
     free(current_structure);
     free(last_structure);
-    printf("Cleanup complete, exiting!\n");
+    printf("This App quit successfully!\n");
     return 0;
 }
