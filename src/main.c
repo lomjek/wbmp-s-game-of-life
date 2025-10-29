@@ -24,10 +24,65 @@ size_t raw_data_size;
 uint8_t *last_structure = NULL;
 uint8_t *current_structure = NULL;
 
+#ifdef DEBUG
+void print_uint8_binary(uint8_t value) {
+    char buf[9];               /* 8 bits + '\0' */
+    for (int i = 0; i < 8; ++i) {
+        uint8_t bit = (value >> (7 - i)) & 1U;
+        buf[i] = bit ? '1' : '0';
+    }
+    buf[8] = '\0';
+
+    printf("%s\n", buf);
+}
+#endif
+
+void set_pixel(unsigned int x, unsigned int y, bool state) {
+    if (x >= width || y >= height) { //The boundaries are treated as dead, can not be alive
+        return;
+    }
+
+    unsigned int width_bytes = width / 8;
+    unsigned int h_byte_offset = x / 8;
+    size_t byte_index = y * width_bytes + h_byte_offset;
+
+    uint8_t byte = current_structure[byte_index];
+
+    unsigned int bit_offset = 7 - (x % 8);
+    if (state) {
+        byte |= (1 << bit_offset); // Set the bit to 1
+    } else {
+        byte &= ~(1 << bit_offset); // Set the bit to 0
+    }
+
+    current_structure[byte_index] = byte;
+}
+
+bool get_pixel(unsigned int x, unsigned int y) {
+    if (x >= width || y >= height) { //The boundaries are treated as dead, can not be alive
+        return false;
+    }
+    unsigned int width_bytes = width / 8;
+    unsigned int h_byte_offset = x / 8;
+    size_t byte_index = y * width_bytes + h_byte_offset;
+
+    uint8_t byte = last_structure[byte_index];
+
+    unsigned int bit_offset = 7 - (x % 8);
+
+    return (byte >> bit_offset) & 1;
+}
+
 void update_pixel(int line, int column) {
     // Placeholder for pixel update logic
     // This function should implement the rules of the Game of Life
     // and update the pixel at (line, column) in current_structure
+
+    /*
+        Tim, du müssen das hier machen!
+        Benutzten Sie get_pixel(line, column) und set_pixel(line, column, state)
+        false=blackö, true = weissö
+    */
 }
 
 bool step() {
@@ -69,7 +124,7 @@ bool save_current_frame() {
 
 int main(int argc, char *argv[]){
     start_time = get_time();
-	printf("WBMP's game of life!\nVersion Alpha, almost nothing is done yet.\n--------------------\n\n");
+	printf("WBMP's game of life!\nVersion 1 BETA\n---------------\n\n");
    
     // Get the arguments
     if (argc != 3) {
@@ -123,7 +178,7 @@ int main(int argc, char *argv[]){
     }
 
     //Actual logic
-    printf("Loading complete, running loop:\n");
+    printf("Loading complete, running loop:\n----------------\n%05.4fms\n\n", get_elapsed_ms(start_time));
     while (current_step < final_step){
         // Save the current frame
         if (!save_current_frame()) {
@@ -138,6 +193,7 @@ int main(int argc, char *argv[]){
         //Increment the step counter
         current_step += 1;
     }
+
     // Save the last frame!
     if (!save_current_frame()) {
         printf("Frame %0*lu saved successfully!\n", used_digits, current_step);

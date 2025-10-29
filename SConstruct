@@ -2,6 +2,12 @@ env = Environment()
 
 target = ARGUMENTS.get('target', 'debug').lower()
 
+env['CCCOMSTR'] = 'Compiling $SOURCE'
+env['SHCCCOMSTR'] = 'Compiling Shared Library $SOURCE'
+
+env['LINKCOMSTR'] = 'Linking $TARGET'
+env['SHLINKCOMSTR'] = 'Linking Shared Library $TARGET'
+
 if target == 'debug':
     print("Building DEBUG configuration...")
     env.Append(
