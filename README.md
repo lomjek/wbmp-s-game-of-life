@@ -12,5 +12,6 @@ You want makefiles?
 ### Do we have future plans with this?
 No.
 ### Should we add something?
+Maybe some time in the future we will add a *ffmpeg* build, so it directly compiles into an animation.
 If it is not a really, really good idea, feel free to make it yourself, because we won't do it.
 Thank you for your patience.
