@@ -38,7 +38,8 @@ void print_uint8_binary(uint8_t value) {
 #endif
 
 void set_pixel(unsigned int x, unsigned int y, bool state) {
-    if (x >= width || y >= height) { //The boundaries are treated as dead, can not be alive
+    //The boundaries are treated as dead, can not be alive
+    if (x >= width || y >= height) {
         return;
     }
 
@@ -59,38 +60,57 @@ void set_pixel(unsigned int x, unsigned int y, bool state) {
 }
 
 bool get_pixel(unsigned int x, unsigned int y) {
-    if (x >= width || y >= height) { //The boundaries are treated as dead, can not be alive
+    //The boundaries are treated as dead, can not be alive
+    if (x >= width || y >= height) {
         return false;
     }
+
     unsigned int width_bytes = width / 8;
     unsigned int h_byte_offset = x / 8;
     size_t byte_index = y * width_bytes + h_byte_offset;
 
-    uint8_t byte = last_structure[byte_index];
+    uint8_t byte = current_structure[byte_index];
 
     unsigned int bit_offset = 7 - (x % 8);
 
     return (byte >> bit_offset) & 1;
 }
 
-void update_pixel(int line, int column) {
-    // Placeholder for pixel update logic
-    // This function should implement the rules of the Game of Life
-    // and update the pixel at (line, column) in current_structure
+unsigned int get_surrounding_live_pixel_count(int x, int y) {
+    unsigned int count = 0;
+    //corners
+    count += get_pixel(x+1, y+1);
+    count += get_pixel(x-1, y+1);
+    count += get_pixel(x-1, y-1);
+    count += get_pixel(x+1, y-1);
+    //touching
+    count += get_pixel(x, y+1);
+    count += get_pixel(x, y-1);
+    count += get_pixel(x+1, y);
+    count += get_pixel(x-1, y);
 
-    /*
-        Tim, du müssen das hier machen!
-        Benutzten Sie get_pixel(line, column) und set_pixel(line, column, state)
-        false=blackö, true = weissö
-    */
+    return count;
+}
+void update_pixel(int x, int y) {
+    unsigned int surrounding_live_pixels = get_surrounding_live_pixel_count(x, y);
+    if (get_pixel(x, y)) { //If pixel is alive.
+        if (surrounding_live_pixels < 2) {
+            set_pixel(x, y, false);
+        } else if (surrounding_live_pixels > 3) {
+            set_pixel(x, y, false);
+        }
+    } else { //the pixel is dead.
+        if (surrounding_live_pixels == 3) {
+            set_pixel(x, y, true);
+        }
+    }
 }
 
 bool step() {
     //Push current structure to last structure
     *last_structure = *current_structure;
-
-    for (int line = 0; line < height; line++) {
-        for (int column = 0; column < width; column++) {
+    for (int line = 0; line < width; line++) {
+        for (int column = 0; column < height; column++) {
             update_pixel(line, column);
         }
     }
@@ -188,6 +208,7 @@ int main(int argc, char *argv[]){
         //Rendering the next frame
         printf("Rendering frame: %0*lu/", used_digits, current_step + 1);
         printf("%lu\n", final_step);
+
         step();
 
         //Increment the step counter

@@ -11,5 +11,8 @@ frames/
 *.swp
 *.swo
 *.wbmp
+*.mp4
+*.avi
+*.webm
 
 !IMG_4030.wbmp
