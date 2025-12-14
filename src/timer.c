@@ -35,3 +35,25 @@ double get_elapsed_ms(uint64_t start_time) {
     // Convert microseconds to milliseconds
     return (double)elapsed_us / 1000.0;
 }
+
+void print_timestamp(const double milliseconds) {
+    double number;
+    const char *unit;
+
+    // Determine value and unit
+    if (milliseconds >= 1000.0) {
+        number = milliseconds / 1000.0;
+        unit = "s";
+    }
+    else {
+        number = milliseconds;
+        unit = "ms";
+    }
+
+    // Print the formatted string directly.
+    // "%8.2f":
+    // 8 is the minimum field width (4 digits before the dot + 1 dot + 2 digits after the dot + 1 for the space padding/sign/etc if needed, ensuring at least 4 digits before the dot are covered with padding)
+    // .2 is for two digits after the decimal point
+    // The default padding for floats is spaces, which meets the requirement.
+    printf("%8.2f%s\n", number, unit);
+}
