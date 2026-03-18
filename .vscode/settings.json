@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "dir_io.h": "c",
+        "compare": "c"
+    }
+}

@@ -301,7 +301,7 @@ void print_usage_instructions(){
 
 int main(int argc, char *argv[]){
     start_time = get_time();
-	printf("WBMP's game of life!\nVersion 1.0\n---------------\n\n");
+	printf("WBMP's game of life!\nVersion C_1.0\n---------------\n\n");
    
     unsigned int argument_pointer = 1u;
 
