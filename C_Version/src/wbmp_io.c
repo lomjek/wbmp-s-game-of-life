@@ -12,7 +12,7 @@ size_t load_wbmp(char *file_path, unsigned int *width, unsigned int *height, uin
     printf("\tFile opened!\n");
 #endif
 
-    //Verifying the header
+    // Verifying the header
     uint8_t header[2] = {0xFF, 0xFF};
     size_t bytes_read = fread(header, 1, 2, file);
     if (bytes_read != 2) {
@@ -61,7 +61,7 @@ size_t load_wbmp(char *file_path, unsigned int *width, unsigned int *height, uin
 #ifdef DEBUG
     printf("\tLoaded image dimesnions!\n");
 #endif
-    //Getting the image data
+    // Getting the image data
     size_t calc_data_size = (size_t)(((*width * *height) + 7) / 8);
     if (calc_data_size == 0) {
         printf("Not understood what to allocate!\n");

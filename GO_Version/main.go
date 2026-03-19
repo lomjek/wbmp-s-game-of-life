@@ -9,6 +9,10 @@ import (
 
 // @ {} [] # \ || !=
 
+var current_structure []uint8;
+var last_structure []uint8;
+
+var current_step uint = 0;
 var final_steps uint = 0;
 
 type output_type uint;
@@ -31,10 +35,6 @@ func print_usage_instructions(){
 
 func main(){
 	fmt.Print("WBMP's game of life!\nVersion Go_1.0\n---------------\n\n");
-
-	var uint_var_test [6]uint8 = [6]uint8{0x94, 0x00};
-	fmt.Println(uintvar_to_uint(uint_var_test[:]));
-	fmt.Println(uint_to_uintvar(2560));
 
 	var skip_pass bool = false;
 	for index, value := range os.Args {
@@ -68,11 +68,12 @@ func main(){
 				os.Exit(-1);
 			}
 			final_steps = uint(steps);
+			skip_pass = true;
 		}
 
 		if value == "-t" { //Retrive the type value
 			if (index + 1) >= len(os.Args){
-				fmt.Println("Didn't find the step value.");
+				fmt.Println("Didn't find the type value.");
 				print_usage_instructions();
 				os.Exit(-1);
 			}
@@ -87,10 +88,24 @@ func main(){
 					print_usage_instructions();
 					os.Exit(-1);
 			}
+			skip_pass = true;
 		}
 
 		if value == "-i" { //Retrive the input file
-			//TODO
+			if (index + 1) >= len(os.Args){
+				fmt.Println("Didn't find the input value.");
+				print_usage_instructions();
+				os.Exit(-1);
+			}
+			var file_name = strings.Trim(os.Args[index + 1], " ");
+			no_err, r_width, r_height, content := load_wbmp(file_name);
+			if (no_err == false) || (r_width == 0) || (r_height == 0) {
+				fmt.Println("The image at the provided path is invalid.");
+				os.Exit(-1);
+			}
+			current_structure = content;
+			last_structure = content;
+			skip_pass = true;
 		}
 	}
 }
