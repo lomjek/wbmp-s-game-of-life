@@ -1,7 +1,7 @@
 #include "headers/uintvar.h"
 
 bool is_uintvar_done(uint8_t byte){
-    return (byte & 0x80) == 0;
+    return (byte & 0b10000000) == 0;
 }
 
 unsigned int uintvar_to_int(const uint8_t *number) {
@@ -16,7 +16,7 @@ unsigned int uintvar_to_int(const uint8_t *number) {
         }
         if (i == 4) {
             perror("The uintvar is too large for this program. More than 32 bits");
-            break; 
+            return 0; 
         }
     }
 
@@ -30,13 +30,11 @@ unsigned int uintvar_to_int(const uint8_t *number) {
 }
 
 size_t int_to_uintvar(unsigned int value, uint8_t *number) {
-    // handle zero explicitly
-    if (value == 0) {
+    if (value == 0) { // Handle 0
         number[0] = 0x00;
         return 1;
     }
 
-    // collect 7-bit chunks from LSB to MSB into a small buffer
     uint8_t tmp[5];
     int count = 0;
     while (value != 0 && count < 5) {
@@ -44,11 +42,9 @@ size_t int_to_uintvar(unsigned int value, uint8_t *number) {
         value >>= 7;
     }
 
-    // if value still non-zero here, it exceeded 35 bits — but for 32-bit unsigned this won't happen
-    // now write bytes in big-endian order: most-significant chunk first
     for (int i = count - 1; i >= 0; --i) {
         uint8_t b = tmp[i];
-        if (i != 0) { // more bytes follow -> set continuation bit
+        if (i != 0) {
             b |= 0x80;
         }
         *number++ = b;

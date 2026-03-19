@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+// @ {} [] # \ || !=
+
 var final_steps uint = 0;
 
 type output_type uint;
@@ -29,6 +31,10 @@ func print_usage_instructions(){
 
 func main(){
 	fmt.Print("WBMP's game of life!\nVersion Go_1.0\n---------------\n\n");
+
+	var uint_var_test [6]uint8 = [6]uint8{0x94, 0x00};
+	fmt.Println(uintvar_to_uint(uint_var_test[:]));
+	fmt.Println(uint_to_uintvar(2560));
 
 	var skip_pass bool = false;
 	for index, value := range os.Args {
