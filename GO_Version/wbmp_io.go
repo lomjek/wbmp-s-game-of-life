@@ -5,8 +5,8 @@ import (
 	"os"
 )
 
-func load_wbmp(file_path string)(finished bool, width uint32, height uint32, file_content []uint8){
-	finished = false;
+func load_wbmp(file_path string)(succes bool, width uint32, height uint32, file_content []uint8){
+	succes = false;
 	fmt.Println("Loading WBMP file:", file_path);
 	var file *os.File;
 	var err error;
@@ -84,10 +84,73 @@ func load_wbmp(file_path string)(finished bool, width uint32, height uint32, fil
 	fmt.Println("\tLoaded image data!");
 
 	file.Close();
-	finished = true;
+	succes = true;
 	return;
 }
 
-func save_wbmp()(){
-	//TODO
+func save_wbmp(file_path string, width uint32, height uint32, image_data []uint8)(succes bool){
+	succes = false;
+	fmt.Println("Saving WBMP file:", file_path);
+	var file *os.File;
+	var err error;
+	file, err = os.Create(file_path);
+	if err != nil {
+		fmt.Println("Opening file did not work.");
+		return;
+	}
+
+	defer file.Close();
+
+	fmt.Println("\tFile opened susesfully!");
+
+	//Writing the header.
+	for i := 0; i < 2; i++ {
+		var byte_wrote int;
+		byte_wrote, err = file.Write([]byte{0x00});
+		if (err != nil) || (byte_wrote != 1) {
+			fmt.Println("Could not write header to file!");
+			return;
+		}
+	}
+
+	fmt.Println("\tHeader of the file is written!");
+
+	//Writing the dimensions
+	var width_buffer []uint8;
+	width_buffer = uint_to_uintvar(width);
+
+	var height_buffer []uint8;
+	height_buffer = uint_to_uintvar(height);
+
+	var byte_wrote int;
+	byte_wrote, err = file.Write(width_buffer);
+	if (byte_wrote != len(width_buffer)) || err != nil {
+		fmt.Println("Could not write width into file!");
+		return;
+	}
+
+	byte_wrote, err = file.Write(height_buffer);
+	if (byte_wrote != len(height_buffer)) || err != nil {
+		fmt.Println("Could not write height into file!");
+		return;
+	}
+
+	fmt.Println("\tDimensions are stored too!");
+
+	//Here you save the actual data
+	byte_wrote, err = file.Write(image_data);
+
+	if (err != nil) || (len(image_data) != byte_wrote) {
+		fmt.Println("Could not write data into file!");
+		return;
+	}
+
+	fmt.Println("\tImage data stored!");
+
+	file.Close();
+
+	succes = true;
+	fmt.Println("\tWriting image succesful!");
+
+	return;
 }

@@ -15,6 +15,9 @@ var last_structure []uint8;
 var current_step uint = 0;
 var final_steps uint = 0;
 
+var img_width uint32 = 0;
+var img_height uint32;
+
 type output_type uint;
 const (
 	NONE output_type = iota
@@ -105,7 +108,11 @@ func main(){
 			}
 			current_structure = content;
 			last_structure = content;
+			img_width = r_width;
+			img_height = r_height;
 			skip_pass = true;
 		}
 	}
+
+	save_wbmp("./output.wbmp", img_width, img_height, current_structure);
 }
