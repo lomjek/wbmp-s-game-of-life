@@ -258,6 +258,7 @@ bool get_output_ready(char *path) {
             return prepare_output_file(path);
         }
         else {
+            current_save_mode = ANIMATION;
             return prepare_output_folder(path);
         }
     }
