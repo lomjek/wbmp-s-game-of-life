@@ -1,6 +1,7 @@
 env = Environment()
 
 target = ARGUMENTS.get('target', 'debug').lower()
+portable = ARGUMENTS.get('portable', 'false').lower()
 
 env['CCCOMSTR'] = 'Compiling $SOURCE'
 env['SHCCCOMSTR'] = 'Compiling Shared Library $SOURCE'
@@ -20,6 +21,12 @@ elif target == 'release':
     env.Append(
         CCFLAGS = ['-Oz', '-DNDEBUG'],
         CPPDEFINES = ['RELEASE']
+    )
+
+if portable == 'true':
+    print("Building PORTABLE configuration...")
+    env.Append(
+        LINKFLAGS = ['-static']
     )
 
 else:
