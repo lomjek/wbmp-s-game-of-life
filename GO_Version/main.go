@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -18,6 +19,7 @@ var last_structure []uint8;
 
 var current_step uint = 0;
 var final_step uint = 0;
+var used_digits uint8 = 0;
 
 var img_width uint32 = 0;
 var img_height uint32;
@@ -35,6 +37,92 @@ func wait_for_enter() {
     fmt.Print("Press Enter to continue...")
     reader := bufio.NewReader(os.Stdin)
     _, _ = reader.ReadString('\n')
+}
+
+func set_pixel(x uint32, y uint32, state bool) {
+    //The boundaries are treated as dead, can not be alive
+	if (x >= img_width || y >= img_height){
+		return;
+	}
+
+	var width_bytes uint = uint(img_width) / 8
+	var h_byte_offset uint = uint(x) / 8;
+	var byte_index uint = uint(y) * width_bytes + h_byte_offset;
+
+	var byte_content uint8 = current_structure[byte_index];
+
+	var bit_offset uint = 7 - (uint(x) % 8);
+	if state {
+		byte_content |= (1 << bit_offset)
+	} else {
+		byte_content &= ^(1 << bit_offset);
+	}
+
+	current_structure[byte_index] = byte_content;
+}
+
+func get_pixel(x uint32, y uint32) (state bool){
+    //The boundaries are treated as dead, can not be alive
+	if (x >= img_width || y >= img_height){
+		return;
+	}
+
+	var width_bytes = img_width / 8;
+    var h_byte_offset = x / 8;
+    var byte_index = y * width_bytes + h_byte_offset;
+
+    var byte_content uint8 = last_structure[byte_index];
+
+    var bit_offset uint = 7 - (uint(x) % 8);
+
+	return ((byte_content >> bit_offset) & 1) != 0;
+}
+
+func get_surrounding_live_pixel_count(x uint32, y uint32)(live_pixels uint8){
+	//corners
+	if get_pixel(x + 1, y + 1) { live_pixels += 1; }
+	if get_pixel(x - 1, y + 1) { live_pixels += 1; }
+	if get_pixel(x - 1, y - 1) { live_pixels += 1; }
+	if get_pixel(x + 1, y - 1) { live_pixels += 1; }
+	//touching
+	if get_pixel(x, y + 1) { live_pixels += 1; }
+	if get_pixel(x, y - 1) { live_pixels += 1; }
+	if get_pixel(x + 1, y) { live_pixels += 1; }
+	if get_pixel(x - 1, y) { live_pixels += 1; }
+
+	return live_pixels;
+}
+
+func update_pixel(x uint32, y uint32){
+	var surrounding_live_pixels uint8 = get_surrounding_live_pixel_count(x, y);
+	if get_pixel(x, y) { //If the pixel is alive
+		if surrounding_live_pixels < 2 {
+			set_pixel(x, y, false);
+		} else if surrounding_live_pixels > 3 {
+			set_pixel(x, y, false);
+		}
+	} else {
+		if surrounding_live_pixels == 3 { //If the pixel is dead
+			set_pixel(x, y, true);
+		}
+	}
+}
+
+func step() {
+	last_structure = current_structure;
+	for line := 0; line < int(img_width); line++ {
+		for column := 0; column < int(img_height); column++ {
+			update_pixel(uint32(line), uint32(column));
+		}
+	}
+}
+
+func save_current_frame() {
+	var frame_path string = output_path + fmt.Sprintf("/frame_%0[1]*d.wbmp", used_digits, current_step);
+	if !save_wbmp(frame_path, img_width, img_height, current_structure) {
+		fmt.Println();
+		wait_for_enter();
+	}
 }
 
 //region Handle Input
@@ -130,6 +218,7 @@ func main(){
 				os.Exit(-1);
 			}
 			final_step = uint(steps);
+			used_digits = uint8(math.Floor(math.Log10(float64(final_step))) + 1)
 			skip_pass = true;
 			continue;
 		}
@@ -199,6 +288,35 @@ func main(){
 	
 	fmt.Println("----------------");
 	print_timestamp(get_elapsed_ms(start_time));
-	//print_timestamp
-	save_wbmp("./output.wbmp", img_width, img_height, current_structure);
+	
+	//Main Loop
+	for current_step < final_step {
+		if current_output_type == ANIMATION {
+			save_current_frame();
+		}
+
+		fmt.Println("\n----------------")
+		print_timestamp(get_elapsed_ms(start_time));
+
+		//Regdering next frame
+		fmt.Printf("Rendering frame: %0[1]*d/", used_digits, current_step + 1);
+		fmt.Printf("%d\n", final_step);
+		
+		step()
+
+		//Increment the step counter
+		current_step += 1;
+	}
+
+	switch current_output_type {
+		case ANIMATION:
+			save_current_frame();
+		case FRAME:
+			save_wbmp(output_path, img_width, img_height, current_structure);
+	}
+
+	fmt.Println("\n----------------")
+	print_timestamp(get_elapsed_ms(start_time))
+	fmt.Println("This App quit successfully!");
+	os.Exit(0);
 }
