@@ -11,6 +11,8 @@
 #include "file_io.h"
 #include "timer.h"
 
+// @ {} [] # \ || !=
+
 double start_time = 0;
 
 unsigned int height = 0;
@@ -108,6 +110,7 @@ unsigned int get_surrounding_live_pixel_count(int x, int y) {
 
     return count;
 }
+
 void update_pixel(int x, int y) {
     unsigned int surrounding_live_pixels = get_surrounding_live_pixel_count(x, y);
     if (get_pixel(x, y)) { //If pixel is alive.
@@ -136,8 +139,6 @@ bool step() {
 
 bool save_current_frame() {
     //Writing the current frame
-    printf("->%s\n", output_path);
-
     size_t buffer_size = strlen(output_path) + 1 + 6 + used_digits + 5 + 1;
     char frame_path[buffer_size];
     int path_chars_written = snprintf(
@@ -160,7 +161,6 @@ bool save_current_frame() {
         wait_for_enter();
     }
 
-    printf("Saved frame to %s\n", frame_path);
     return true;
 }
 
@@ -258,6 +258,7 @@ bool get_output_ready(char *path) {
             return prepare_output_file(path);
         }
         else {
+            current_save_mode = ANIMATION;
             return prepare_output_folder(path);
         }
     }
@@ -381,9 +382,7 @@ int main(int argc, char *argv[]){
     //Main Loop
     while (current_step < final_step){
         if (current_save_mode == ANIMATION){
-            if (!save_current_frame()) {
-                printf("Frame %0*lu saved successfully!\n", used_digits, current_step);
-            }
+            save_current_frame();
         }
 
         printf("\n----------------\n");
