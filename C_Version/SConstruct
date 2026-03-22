@@ -23,15 +23,15 @@ elif target == 'release':
         CPPDEFINES = ['RELEASE']
     )
 
+else:
+    print(f"Error: Unknown target '{target}'. Use 'debug' or 'release'.")
+    Exit(1)
+
 if portable == 'true':
     print("Building PORTABLE configuration...")
     env.Append(
         LINKFLAGS = ['-static']
     )
-
-else:
-    print(f"Error: Unknown target '{target}'. Use 'debug' or 'release'.")
-    Exit(1)
 
 
 env.Append(
@@ -39,4 +39,4 @@ env.Append(
     CPPPATH=['#'],
     LIBS=['m', 'rt']
 ) 
-env.Program('game_of_life', Glob('src/*.c'))
+env.Program('game_of_life', Glob('./*.c'))

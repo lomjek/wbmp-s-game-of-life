@@ -1,4 +1,4 @@
-#include "headers/uintvar.h"
+#include "uintvar.h"
 
 bool is_uintvar_done(uint8_t byte){
     return (byte & 0x80) == 0;

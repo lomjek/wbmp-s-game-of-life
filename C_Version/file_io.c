@@ -1,4 +1,4 @@
-#include "headers/file_io.h"
+#include "file_io.h"
 
 #if defined(_WIN32) || defined(_WIN64) // Windows Implementation
     #include <windows.h>
@@ -7,7 +7,6 @@
     #include <sys/stat.h>
     #include <sys/types.h>
     #include <dirent.h>
-    #include <errno.h>
 #endif
 
 bool is_valid_dir(const char *path) {

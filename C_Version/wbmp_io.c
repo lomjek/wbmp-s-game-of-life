@@ -1,4 +1,4 @@
-#include "headers/wbmp_io.h"
+#include "wbmp_io.h"
 
 size_t load_wbmp(char *file_path, unsigned int *width, unsigned int *height, uint8_t **buffer){
     printf("Loading WBMP file: %s\n", file_path);
