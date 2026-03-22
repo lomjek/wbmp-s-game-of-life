@@ -11,6 +11,8 @@
 #include "headers/file_io.h"
 #include "headers/timer.h"
 
+// @ {} [] # \ || !=
+
 double start_time = 0;
 
 unsigned int height = 0;

@@ -6,9 +6,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // @ {} [] # \ || !=
+
+var start_time time.Time;
 
 var current_structure []uint8;
 var last_structure []uint8;
@@ -62,20 +65,21 @@ func prepare_output_file(file_path string)(success bool){
 }
 
 func get_output_ready(path string)(success bool){
-	if current_output_type == NONE {
-		if strings.HasSuffix(path, ".wbmp") {
-			current_output_type = FRAME;
-			return prepare_output_file(path);
-		} else {
-			current_output_type = ANIMATION;
+	switch current_output_type {
+		case NONE:
+			if strings.HasSuffix(path, ".wbmp") {
+				current_output_type = FRAME;
+				return prepare_output_file(path);
+			} else {
+				current_output_type = ANIMATION;
+				return prepare_output_folder(path);
+			}
+		case ANIMATION:
 			return prepare_output_folder(path);
-		}
-	} else if (current_output_type == ANIMATION) {
-		return prepare_output_folder(path);
-	} else if current_output_type == FRAME {
-		return prepare_output_file(path);
-	} else {
-		return false;
+		case FRAME:
+			return prepare_output_file(path);
+		default:
+			return false;
 	}
 }
 
@@ -88,8 +92,10 @@ func print_usage_instructions(){
     fmt.Println("\t-o\tOutput\tWill make a output file, if path ends with .wbmp, else a folder will be created.");
     fmt.Println("\t-t\tType\tCan be used to manually override type.");
 }
+//endregion
 
 func main(){
+	start_time = get_time()
 	fmt.Print("WBMP's game of life!\nVersion Go_1.0\n---------------\n\n");
 
 	var skip_pass bool = false;
@@ -190,7 +196,9 @@ func main(){
 	}
 
 	fmt.Printf("Building type=%d with %d steps into %s\n", current_output_type, final_step, output_path)
+	
 	fmt.Println("----------------");
+	print_timestamp(get_elapsed_ms(start_time));
 	//print_timestamp
 	save_wbmp("./output.wbmp", img_width, img_height, current_structure);
 }
