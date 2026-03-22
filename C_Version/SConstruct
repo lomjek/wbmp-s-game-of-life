@@ -1,6 +1,7 @@
 env = Environment()
 
 target = ARGUMENTS.get('target', 'debug').lower()
+portable = ARGUMENTS.get('portable', 'false').lower()
 
 env['CCCOMSTR'] = 'Compiling $SOURCE'
 env['SHCCCOMSTR'] = 'Compiling Shared Library $SOURCE'
@@ -26,10 +27,16 @@ else:
     print(f"Error: Unknown target '{target}'. Use 'debug' or 'release'.")
     Exit(1)
 
+if portable == 'true':
+    print("Building PORTABLE configuration...")
+    env.Append(
+        LINKFLAGS = ['-static']
+    )
+
 
 env.Append(
     CCGLAGS = ['-Wextra', '-Wall'],
     CPPPATH=['#'],
     LIBS=['m', 'rt']
 ) 
-env.Program('game_of_life', Glob('src/*.c'))
+env.Program('game_of_life', Glob('./*.c'))

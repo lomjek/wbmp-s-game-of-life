@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "headers/uintvar.h"
+#include "uintvar.h"
 
 size_t load_wbmp(char *file_path, unsigned int *width, unsigned int *height, uint8_t **buffer);
 

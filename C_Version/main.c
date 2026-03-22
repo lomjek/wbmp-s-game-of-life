@@ -7,9 +7,9 @@
 #include <math.h>
 #include <limits.h>
 
-#include "headers/wbmp_io.h"
-#include "headers/file_io.h"
-#include "headers/timer.h"
+#include "wbmp_io.h"
+#include "file_io.h"
+#include "timer.h"
 
 // @ {} [] # \ || !=
 
