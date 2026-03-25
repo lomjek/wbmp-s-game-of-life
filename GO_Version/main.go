@@ -17,8 +17,8 @@ var start_time time.Time;
 var current_structure []uint8;
 var last_structure []uint8;
 
-var current_step uint = 0;
-var final_step uint = 0;
+var current_step uint64 = 0;
+var final_step uint64 = 0;
 var used_digits uint8 = 0;
 
 var img_width uint32 = 0;
@@ -31,101 +31,16 @@ const (
 	ANIMATION
 )
 var current_output_type output_type = NONE;
+
 var output_path string;
 
+//region Handle Input
 func wait_for_enter() {
     fmt.Print("Press Enter to continue...")
     reader := bufio.NewReader(os.Stdin)
     _, _ = reader.ReadString('\n')
 }
 
-func set_pixel(x uint32, y uint32, state bool) {
-    //The boundaries are treated as dead, can not be alive
-	if (x >= img_width || y >= img_height){
-		return;
-	}
-
-	var width_bytes uint = uint(img_width) / 8
-	var h_byte_offset uint = uint(x) / 8;
-	var byte_index uint = uint(y) * width_bytes + h_byte_offset;
-
-	var byte_content uint8 = current_structure[byte_index];
-
-	var bit_offset uint = 7 - (uint(x) % 8);
-	if state {
-		byte_content |= (1 << bit_offset)
-	} else {
-		byte_content &= ^(1 << bit_offset);
-	}
-
-	current_structure[byte_index] = byte_content;
-}
-
-func get_pixel(x uint32, y uint32) (state bool){
-    //The boundaries are treated as dead, can not be alive
-	if (x >= img_width || y >= img_height){
-		return;
-	}
-
-	var width_bytes = img_width / 8;
-    var h_byte_offset = x / 8;
-    var byte_index = y * width_bytes + h_byte_offset;
-
-    var byte_content uint8 = last_structure[byte_index];
-
-    var bit_offset uint = 7 - (uint(x) % 8);
-
-	return ((byte_content >> bit_offset) & 1) != 0;
-}
-
-func get_surrounding_live_pixel_count(x uint32, y uint32)(live_pixels uint8){
-	//corners
-	if get_pixel(x + 1, y + 1) { live_pixels += 1; }
-	if get_pixel(x - 1, y + 1) { live_pixels += 1; }
-	if get_pixel(x - 1, y - 1) { live_pixels += 1; }
-	if get_pixel(x + 1, y - 1) { live_pixels += 1; }
-	//touching
-	if get_pixel(x, y + 1) { live_pixels += 1; }
-	if get_pixel(x, y - 1) { live_pixels += 1; }
-	if get_pixel(x + 1, y) { live_pixels += 1; }
-	if get_pixel(x - 1, y) { live_pixels += 1; }
-
-	return live_pixels;
-}
-
-func update_pixel(x uint32, y uint32){
-	var surrounding_live_pixels uint8 = get_surrounding_live_pixel_count(x, y);
-	if get_pixel(x, y) { //If the pixel is alive
-		if surrounding_live_pixels < 2 {
-			set_pixel(x, y, false);
-		} else if surrounding_live_pixels > 3 {
-			set_pixel(x, y, false);
-		}
-	} else {
-		if surrounding_live_pixels == 3 { //If the pixel is dead
-			set_pixel(x, y, true);
-		}
-	}
-}
-
-func step() {
-	last_structure = current_structure;
-	for line := 0; line < int(img_width); line++ {
-		for column := 0; column < int(img_height); column++ {
-			update_pixel(uint32(line), uint32(column));
-		}
-	}
-}
-
-func save_current_frame() {
-	var frame_path string = output_path + fmt.Sprintf("/frame_%0[1]*d.wbmp", used_digits, current_step);
-	if !save_wbmp(frame_path, img_width, img_height, current_structure) {
-		fmt.Println();
-		wait_for_enter();
-	}
-}
-
-//region Handle Input
 func prepare_output_folder(dir_path string)(success bool){
 	if !is_valid_dir(dir_path) {
 		fmt.Println("The frames directory does not exist, creating it now...");
@@ -180,12 +95,8 @@ func print_usage_instructions(){
     fmt.Println("\t-o\tOutput\tWill make a output file, if path ends with .wbmp, else a folder will be created.");
     fmt.Println("\t-t\tType\tCan be used to manually override type.");
 }
-//endregion
 
-func main(){
-	start_time = get_time()
-	fmt.Print("WBMP's game of life!\nVersion Go_1.0\n---------------\n\n");
-
+func parse_input() {
 	var skip_pass bool = false;
 	for index, value := range os.Args {
 		if index == 0 {
@@ -217,7 +128,7 @@ func main(){
 				print_usage_instructions();
 				os.Exit(-1);
 			}
-			final_step = uint(steps);
+			final_step = uint64(steps);
 			used_digits = uint8(math.Floor(math.Log10(float64(final_step))) + 1)
 			skip_pass = true;
 			continue;
@@ -283,6 +194,101 @@ func main(){
 		fmt.Printf("The argument %s is being ignored\n", value);
 		wait_for_enter();
 	}
+}
+//endregion
+//region GameLogic
+func set_pixel(x uint32, y uint32, state bool) {
+    //The boundaries are treated as dead, can not be alive
+	if (x >= img_width || y >= img_height){
+		return;
+	}
+
+	var width_bytes uint32 = img_width / 8
+	var h_byte_offset uint32 = x / 8;
+	var byte_index uint64 = uint64(y * width_bytes + h_byte_offset);
+
+	var byte_content uint8 = current_structure[byte_index];
+
+	var bit_offset uint8 = uint8(7 - (x % 8));
+	if state {
+		byte_content |= (1 << bit_offset)
+	} else {
+		byte_content &= ^(1 << bit_offset);
+	}
+
+	current_structure[byte_index] = byte_content;
+}
+
+func get_pixel(x uint32, y uint32) (state bool){
+    //The boundaries are treated as dead, can not be alive
+	if (x >= img_width || y >= img_height){
+		return;
+	}
+
+	var width_bytes uint32 = img_width / 8;
+    var h_byte_offset uint32 = x / 8;
+    var byte_index uint64 = uint64(y * width_bytes + h_byte_offset);
+
+    var byte_content uint8 = last_structure[byte_index];
+
+    var bit_offset uint8 = uint8(7 - (x % 8));
+
+	return ((byte_content >> bit_offset) & 1) != 0;
+}
+
+func get_surrounding_live_pixel_count(x uint32, y uint32)(live_pixels uint8){
+	//corners
+	if get_pixel(x + 1, y + 1) { live_pixels += 1; }
+	if get_pixel(x - 1, y + 1) { live_pixels += 1; }
+	if get_pixel(x - 1, y - 1) { live_pixels += 1; }
+	if get_pixel(x + 1, y - 1) { live_pixels += 1; }
+	//touching
+	if get_pixel(x, y + 1) { live_pixels += 1; }
+	if get_pixel(x, y - 1) { live_pixels += 1; }
+	if get_pixel(x + 1, y) { live_pixels += 1; }
+	if get_pixel(x - 1, y) { live_pixels += 1; }
+
+	return live_pixels;
+}
+
+func update_pixel(x uint32, y uint32){
+	var surrounding_live_pixels uint8 = get_surrounding_live_pixel_count(x, y);
+	if get_pixel(x, y) { //If the pixel is alive
+		if surrounding_live_pixels < 2 {
+			set_pixel(x, y, false);
+		} else if surrounding_live_pixels > 3 {
+			set_pixel(x, y, false);
+		}
+	} else {
+		if surrounding_live_pixels == 3 { //If the pixel is dead
+			set_pixel(x, y, true);
+		}
+	}
+}
+
+func step() {
+	last_structure = current_structure;
+	for line := 0; line < int(img_width); line++ {
+		for column := 0; column < int(img_height); column++ {
+			update_pixel(uint32(line), uint32(column));
+		}
+	}
+}
+
+func save_current_frame() {
+	var frame_path string = output_path + fmt.Sprintf("/frame_%0[1]*d.wbmp", used_digits, current_step);
+	if !save_wbmp(frame_path, img_width, img_height, current_structure) {
+		fmt.Println();
+		wait_for_enter();
+	}
+}
+//endregion
+
+func main(){
+	start_time = get_time()
+	fmt.Print("WBMP's game of life!\nVersion Go_1.0\n---------------\n\n");
+
+	parse_input();
 
 	fmt.Printf("Building type=%d with %d steps into %s\n", current_output_type, final_step, output_path)
 	
