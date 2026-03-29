@@ -1,6 +1,12 @@
 #include "wbmp_io.h"
 
-size_t load_wbmp(char *file_path, unsigned int *width, unsigned int *height, uint8_t **buffer){
+bool wio_verbose = false;
+
+void set_verbose(bool set_v) {
+    wio_verbose = set_v;
+}
+
+uint64_t load_wbmp(char *file_path, unsigned int *width, unsigned int *height, uint8_t **buffer){
     printf("Loading WBMP file: %s\n", file_path);
     FILE *file = fopen(file_path, "rb");
     if (file == NULL) {
@@ -8,9 +14,8 @@ size_t load_wbmp(char *file_path, unsigned int *width, unsigned int *height, uin
         *buffer = NULL;
         return 0;
     }
-#ifdef DEBUG
-    printf("\tFile opened!\n");
-#endif
+
+    if (wio_verbose) printf("\tFile opened!\n");
 
     // Verifying the header
     uint8_t header[2] = {0xFF, 0xFF};
@@ -24,9 +29,8 @@ size_t load_wbmp(char *file_path, unsigned int *width, unsigned int *height, uin
         printf("The header is invalid!\n");
         return 0;
     }
-#ifdef DEBUG
-    printf("\tVerified header!\n");
-#endif
+
+    if (wio_verbose) printf("\tVerified header!\n");
 
     // Getting image dimensions
     uint8_t img_width[5];
@@ -58,9 +62,8 @@ size_t load_wbmp(char *file_path, unsigned int *width, unsigned int *height, uin
     }
     *height = uintvar_to_int(img_height);
 
-#ifdef DEBUG
-    printf("\tLoaded image dimesnions!\n");
-#endif
+    if (wio_verbose) printf("\tLoaded image dimesnions!\n");
+
     // Getting the image data
     size_t calc_data_size = (size_t)(((*width * *height) + 7) / 8);
     if (calc_data_size == 0) {
@@ -75,25 +78,16 @@ size_t load_wbmp(char *file_path, unsigned int *width, unsigned int *height, uin
         return 0;
     }
 
-#ifdef DEBUG
-    printf("\tPrepared memory for the image!\n"); 
-#endif
-
     size_t data_amount = fread(*buffer, 1, calc_data_size, file);
     if(data_amount != calc_data_size) {
         perror("Not entire image data could be read!\n");
         return 0;
     }
 
-#ifdef DEBUG
-    printf("\tLoaded the image data!\n"); 
-#endif    
+    if (wio_verbose) printf("\tLoaded the image data!\n"); 
 
     //Here you close the wbmp file
     fclose(file);
-#ifdef DEBUG
-    printf("\tNo errors occured during image loading!\n\n");
-#endif
     return calc_data_size;
 }
 
@@ -105,9 +99,7 @@ int save_wbmp(char *file_path, uint8_t *img_data, unsigned int width, unsigned i
         return 2;
     }
 
-#ifdef DEBUG
-    printf("\tFile opened susesfully!\n");
-#endif
+    if (wio_verbose) printf("\tFile opened susesfully!\n");
 
     //Writing the Header
     for (int i = 0; i < 2; i ++) {
@@ -117,9 +109,7 @@ int save_wbmp(char *file_path, uint8_t *img_data, unsigned int width, unsigned i
         }
     }    
     
-#ifdef DEBUG
-    printf("\tHeader of the file is written!\n");
-#endif
+    if (wio_verbose) printf("\tHeader of the file is written!\n");
 
     //Writing the dimensions
     uint8_t width_buffer[5]; //This is the max size that C support for unsigned int in uintvar segments 
@@ -142,9 +132,7 @@ int save_wbmp(char *file_path, uint8_t *img_data, unsigned int width, unsigned i
         }
     }
 
-#ifdef DEBUG
-    printf("\tDimensions are stored too!\n");
-#endif
+    if (wio_verbose) printf("\tDimensions are stored too!\n");
 
     //Here you save the actual data
     for (size_t i = 0; i < data_length; i++) {
@@ -154,14 +142,9 @@ int save_wbmp(char *file_path, uint8_t *img_data, unsigned int width, unsigned i
         }
     }
 
-#ifdef DEBUG
-    printf("\tImage data stored!\n");
-#endif
-
     //Here you close the wbmp file
     fclose(file);
-#ifdef DEBUG
-    printf("\tWriting image succesful!\n");
-#endif
+
+    if (wio_verbose) printf("\tWriting image succesful!\n");
     return 0;
 }

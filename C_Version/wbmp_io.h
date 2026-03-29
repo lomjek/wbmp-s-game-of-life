@@ -12,4 +12,6 @@ size_t load_wbmp(char *file_path, unsigned int *width, unsigned int *height, uin
 
 int save_wbmp(char *file_path, uint8_t *img_data, unsigned int width, unsigned int height, size_t data_length);
 
+void set_verbose(bool set_v);
+
 #endif //WBMP_IO

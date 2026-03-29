@@ -15,6 +15,8 @@
 
 double start_time = 0;
 
+bool verbose = false;
+
 uint8_t *last_structure = NULL;
 uint8_t *current_structure = NULL;
 uint64_t raw_data_size;
@@ -175,6 +177,7 @@ void print_usage_instructions(){
 	printf("\t-i\tInput\tMust be a valid wbmp file.\n");
 	printf("\t-o\tOutput\tWill make a output file, if path ends with .wbmp, else a folder will be created.\n");
 	printf("\t-t\tType\tCan be used to manually override type.\n");
+	printf("\t--verbose\tOutputs more info to the console.\n");
 }
 
 void parse_input(int argc, char *argv[]) {
@@ -239,6 +242,10 @@ void parse_input(int argc, char *argv[]) {
 				print_usage_instructions();
 				return;
 			}
+			argument_pointer ++;
+		}
+		else if (strcmp(argv[argument_pointer], "--verbose") == 0) {
+			verbose = true;
 			argument_pointer ++;
 		}
 		else {
@@ -363,6 +370,8 @@ int main(int argc, char *argv[]){
 	printf("WBMP's game of life!\nVersion C_1.0\n---------------\n\n");
    
 	parse_input(argc, argv);
+	printf("%u", verbose);
+	set_verbose(verbose);
 
 	printf("Building type=%u with %lu steps into %s\n", current_save_mode, final_step, output_path);
 

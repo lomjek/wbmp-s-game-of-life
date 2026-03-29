@@ -16,7 +16,7 @@ func load_wbmp(file_path string)(succes bool, width uint32, height uint32, file_
 		return;
 	}
 
-	fmt.Println("\tFile opened!");
+	if verbose { fmt.Println("\tFile opened!"); } 
 
 	//Verifying the header
 	var header [2]uint8 = [2]uint8{0xFF, 0xFF};
@@ -32,7 +32,7 @@ func load_wbmp(file_path string)(succes bool, width uint32, height uint32, file_
 		return;
 	}
 
-	fmt.Println("\tVerified header!");
+	if verbose { fmt.Println("\tVerified header!") };
 
 	// Getting image dimensions
 	var img_width []uint8;
@@ -65,7 +65,7 @@ func load_wbmp(file_path string)(succes bool, width uint32, height uint32, file_
 	}
 	height = uintvar_to_uint(img_height);
 
-	fmt.Println("\tLoaded image dimensions!");
+	if verbose { fmt.Println("\tLoaded image dimensions!") };
 
 	// Getting the image data
 	var calc_data_size uint64 = ((uint64(width) *  uint64(height)) + 7) / 8;
@@ -81,7 +81,7 @@ func load_wbmp(file_path string)(succes bool, width uint32, height uint32, file_
 		return;
 	}
 
-	fmt.Println("\tLoaded image data!");
+	if verbose { fmt.Println("\tLoaded image data!") };
 
 	file.Close();
 	succes = true;
@@ -101,7 +101,7 @@ func save_wbmp(file_path string, width uint32, height uint32, image_data []uint8
 
 	defer file.Close();
 
-	fmt.Println("\tFile opened susesfully!");
+	if verbose { fmt.Println("\tFile opened susesfully!") };
 
 	//Writing the header.
 	for i := 0; i < 2; i++ {
@@ -113,7 +113,7 @@ func save_wbmp(file_path string, width uint32, height uint32, image_data []uint8
 		}
 	}
 
-	fmt.Println("\tHeader of the file is written!");
+	if verbose { fmt.Println("\tHeader of the file is written!") }
 
 	//Writing the dimensions
 	var width_buffer []uint8;
@@ -145,12 +145,10 @@ func save_wbmp(file_path string, width uint32, height uint32, image_data []uint8
 		return;
 	}
 
-	fmt.Println("\tImage data stored!");
-
 	file.Close();
-
 	succes = true;
-	fmt.Println("\tWriting image succesful!");
+	
+	if verbose { fmt.Println("\tWriting image succesful!") }
 
 	return;
 }

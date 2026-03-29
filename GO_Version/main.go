@@ -14,6 +14,8 @@ import (
 
 var start_time time.Time;
 
+var verbose bool = false;
+
 var current_structure []uint8;
 var last_structure []uint8;
 
@@ -94,6 +96,7 @@ func print_usage_instructions(){
     fmt.Println("\t-i\tInput\tMust be a valid wbmp file.");
     fmt.Println("\t-o\tOutput\tWill make a output file, if path ends with .wbmp, else a folder will be created.");
     fmt.Println("\t-t\tType\tCan be used to manually override type.");
+	fmt.Println("\t--verbose\tOutputs more info to the console.")
 }
 
 func parse_input() {
@@ -188,6 +191,11 @@ func parse_input() {
 				os.Exit(-1);
 			}
 			skip_pass = true;
+			continue;
+		}
+
+		if value == "--verbose" {
+			verbose = true;
 			continue;
 		}
 
